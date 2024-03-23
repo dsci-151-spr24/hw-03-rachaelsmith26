@@ -153,7 +153,6 @@ email_aug <- augment(email_fit$fit)
 ggplot(data = email_aug, aes(x = .fitted, y = .resid)) +
   geom_point()
 ```
-
 🧶 ✅ ⬆️ Knit, *commit, and push your changes to GitHub with an appropriate commit message. Make sure to commit and push all changed files so that your Git pane is cleared up afterwards.*
 
 ## Part 3: Political views and science research
