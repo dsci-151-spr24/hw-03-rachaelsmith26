@@ -73,10 +73,16 @@ The question is phrased as the following.
 Answers to this question are stored in the `harass5` variable in our dataset.
 
 1.  What are the possible responses to this question and how many respondents chose each of these answers?
+***The possible responses to the this question is yes, no and N/A***
 
 2.  What percent of the respondents for whom this question is applicable\
     (i.e. excluding `NA`s and `Does not apply`s) have been harassed by their superiors or co-workers at their job.
-
+***The percentage of respondents for whom this question is applicable is 42 percent***
+```{r}
+gss16 |>
+  filter(!(harass5 == "Yes")) |>
+  nrow()
+```
 🧶 ✅ ⬆️ Knit, *commit, and push your changes to GitHub with an appropriate commit message. Make sure to commit and push all changed files so that your Git pane is cleared up afterwards.*
 
 ## Part 2: Time spent on email
@@ -86,12 +92,18 @@ The responses to these questions are recorded in the `emailhr` and `emailmin` va
 For example, if the response is 2.5 hrs, this would be recorded as `emailhr = 2` and `emailmin = 30`.
 
 3.  Create a new variable called `email` that combines these two variables to reports the number of minutes the respondents spend on email weekly.
+```{r}
+
+```
 
 4.  Visualize the distribution of this new variable.
     Find the mean and the median number of minutes respondents spend on email weekly.
     Is the mean or the median a better measure of the typical among of time Americans spend on email weekly?
     Why?
+```{r}
 
+
+```
 5.  Create another new variable, `snap_insta` that is coded as "Yes" if the respondent reported using any of Snapchat (`snapchat`) or Instagram (`instagrm`), and "No" if not.
     If the recorded value was `NA` for both of these questions, the value in your new variable should also be `NA`.
 
