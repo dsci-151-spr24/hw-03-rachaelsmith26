@@ -6,7 +6,7 @@ output: html_document
 
 ```{r include = FALSE}
 knitr::opts_chunk$set(
-  eval = FALSE,
+  eval = TRUE,
   out.width = "80%",
   fig.asp = 0.618,
   fig.width = 10,
@@ -93,31 +93,66 @@ For example, if the response is 2.5 hrs, this would be recorded as `emailhr = 2`
 
 3.  Create a new variable called `email` that combines these two variables to reports the number of minutes the respondents spend on email weekly.
 ```{r}
-
+gss16 <- gss16 |>
+  mutate(email = emailmin + (emailhr * 60))
 ```
 
 4.  Visualize the distribution of this new variable.
     Find the mean and the median number of minutes respondents spend on email weekly.
     Is the mean or the median a better measure of the typical among of time Americans spend on email weekly?
     Why?
+***The mean number of minutes spent on email per week is 417 mins. The median number of minutes spent on email per week is 120 mins. Mean is the better measure of the typical amount of time Americans spend on email weekly because the data is skewed***
 ```{r}
-
+gss16 |>
+  summarise(
+    mean = mean(email, na.rm = emailmin),
+    emailhr
+  )
 
 ```
 5.  Create another new variable, `snap_insta` that is coded as "Yes" if the respondent reported using any of Snapchat (`snapchat`) or Instagram (`instagrm`), and "No" if not.
     If the recorded value was `NA` for both of these questions, the value in your new variable should also be `NA`.
+```{r}
+gss16 <- gss16 |>
+  mutate(snap_insta = if_else(snapchat == "Yes" | instagrm == "Yes",
+    "Yes", "No"
+  ))
 
+```
 6.  Calculate the percentage of Yes's for `snap_insta` among those who answered the question, i.e. excluding `NA`s.
+
+***37 percent answered yes***
+```{r}
+gss16 |>
+  count(snap_insta)
+```
 
 7.  What are the possible responses to the question *Last week were you working full time, part time, going to school, keeping house, or what?* and how many respondents chose each of these answers?
     Note that this information is stored in the `wrkstat` variable.
-
+  ***The possible responses for this question are: Keeping house	284, Other	89, Retired	574, School	76, Temp not working	57, Unempl, laid off	118, Working fulltime	1321, Working parttime	345, and NA	3.***
+```{r}
+gss16 |>
+  count(wrkstat)
+```
 8.  Fit a model predicting `email` (number of minutes per week spent on email) from `educ` (number of years of education), `wrkstat`, and `snap_insta`.
     Interpret the slopes for each of these variables.
+
+email_fit <- linear_reg() |>
+  set_engine("lm") |>
+  fit(email ~ educ + wrkstat + snap_insta, data = gss16)
+
+tidy(email_fit)
 
 9.  Create a predicted values vs. residuals plot for this model.
     Are there any issues with the model?
     If yes, describe them.
+``{r}
+email_aug <- augment(email_fit$fit)
+```
+``{r}
+ggplot(data = email_aug, aes(x = .fitted, y = .resid)) +
+  geom_point()
+```
 
 🧶 ✅ ⬆️ Knit, *commit, and push your changes to GitHub with an appropriate commit message. Make sure to commit and push all changed files so that your Git pane is cleared up afterwards.*
 
@@ -147,13 +182,38 @@ Responses that were originally Don't know, No answer and Not applicable are alre
 10. In a new variable, recode `advfront` such that Strongly Agree and Agree are mapped to `"Yes"`, and Disagree and Strongly disagree are mapped to `"No"`.
     The remaining levels can be left as is.
     Don't overwrite the existing `advfront`, instead pick a different, informative name for your new variable.
-
+```{r}
+gss16 <- gss16 |>
+  mutate(
+    advfront2 = case_when(
+      advfront %in% c("Strongly agree", "Agree") ~ "Yes",
+      advfront %in% c("Disagree", "Strongly disagree") ~ "No",
+      TRUE ~ advfront
+    )
+  )
+```
 11. In a new variable, recode `polviews` such that Extremely liberal, Liberal, and Slightly liberal, are mapped to `"Liberal"`, and Slghtly conservative, Conservative, and Extrmly conservative disagree are mapped to `"Conservative"`.
     The remaining levels can be left as is.
     Make sure that the levels are in a reasonable order.
     Don't overwrite the existing `polviews`, instead pick a different, informative name for your new variable.
-
+```{r}
+gss16 <- gss16 |>
+  mutate(
+    polviews2 = case_when(
+      polviews %in% c("Extremely liberal", "Liberal", "Slightly liberal") ~ "Liberal",
+      polviews %in% c("Extrmly conservative", "Conservative", "Slghtly conservative") ~ "Conservative",
+      TRUE                                             ~ polviews
+    ),
+    polviews2 = fct_relevel(polviews2, "Conservative", "Moderate", "Liberal")
+  )
+```
 12. Create a visualization that displays the relationship between these two new variables and interpret it.
+```{r}
+gss16 |>
+  filter(!is.na(polviews2), !is.na(advfront2)) |>
+  ggplot(aes(x = polviews2, fill = advfront2)) +
+  geom_bar(position = "fill")
+```
 
 🧶 ✅ ⬆️ Knit, *commit, and push your changes to GitHub with an appropriate commit message. Make sure to commit and push all changed files so that your Git pane is cleared up afterwards and review the md document on GitHub to make sure you're happy with the final state of your work.*
 
